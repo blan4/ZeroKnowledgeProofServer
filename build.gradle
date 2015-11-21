@@ -45,6 +45,7 @@ sourceSets {
 dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     compile('com.google.zxing:core:3.2.1')
+    compile('com.domingosuarez.boot:spring-boot-starter-jade4j:0.3.0')
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-websocket')
     runtime('org.hsqldb:hsqldb')

@@ -6,6 +6,7 @@ import com.seniorsigan.qrauth.core.DigestGenerator
 import com.seniorsigan.qrauth.web.models.SignUpForm
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
@@ -24,14 +25,14 @@ class MainController
     
     
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun index(request: HttpServletRequest): String {
-        val user = request.getAttribute("user")
+    fun index(request: HttpServletRequest, model: Model): String {
+        val user = request.session.getAttribute("user")
+        println(request.session.attributeNames.toList())
         if (user != null) {
-            return user as String
-        } else {
-            return "Hello Anon"
+            model.addAttribute("user", user as String)
         }
+
+        return "index"
     }
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
