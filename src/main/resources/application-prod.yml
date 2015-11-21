@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${SPRING_DB_URL}
+    username: ${SPRING_DB_USERNAME}
+    password: ${SPRING_DB_PASSWORD}
+
+  redis:
+    host: ${SPRING_REDIS_URL}
+    port: ${SPRING_REDIS_PORT}
+    password: ${SPRING_REDIS_PASSWORD}
+
+  devtools:
+    restart:
+      enabled: true
+
+  jade4j:
+    caching: false
+    prettyPrint: true

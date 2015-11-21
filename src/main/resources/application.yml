@@ -1,0 +1,21 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/qrauth_dev
+    username: qrauth
+    password: qrauthpwd
+
+  redis:
+    host: localhost
+    port: 6379
+    password:
+
+  devtools:
+    restart:
+      enabled: true
+
+  jade4j:
+    caching: false
+    prettyPrint: true

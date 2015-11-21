@@ -27,11 +27,10 @@ class MainController
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
         val user = request.session.getAttribute("user")
-        println(request.session.attributeNames.toList())
         if (user != null) {
             model.addAttribute("user", user as String)
         }
-
+        println(request.session.id)
         return "index"
     }
 

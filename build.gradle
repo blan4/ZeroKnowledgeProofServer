@@ -4,9 +4,10 @@ buildscript {
         springBootVersion = '1.3.0.RELEASE'
     }
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
+        classpath 'org.springframework:springloaded:1.2.4.RELEASE'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" 
     }
@@ -15,7 +16,14 @@ buildscript {
 apply plugin: 'kotlin'
 apply plugin: 'java'
 apply plugin: 'idea'
-apply plugin: 'spring-boot' 
+apply plugin: 'spring-boot'
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = file("$buildDir/classes/main/")
+    }
+}
 
 jar {
     baseName = 'qrauth'
@@ -26,7 +34,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    jcenter()
+    maven { url "http://repo.springsource.org/repo" }
 }
 
 sourceSets {
@@ -45,13 +54,39 @@ sourceSets {
 dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
     compile('com.google.zxing:core:3.2.1')
-    compile('com.domingosuarez.boot:spring-boot-starter-jade4j:0.3.0')
+    compile('com.domingosuarez.boot:spring-boot-starter-jade4j:0.3.1')
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile('org.springframework.boot:spring-boot-starter-websocket')
-    runtime('org.hsqldb:hsqldb')
+    
+    compile('org.springframework.boot:spring-boot-starter-jdbc')
+    runtime('org.postgresql:postgresql:9.4-1201-jdbc41')
+    compile('org.mybatis:mybatis:3.3.0')
+    compile('org.mybatis:mybatis-spring:1.2.3')
+    compile('org.flywaydb:flyway-core:3.2.1')
+    
+    compile('org.springframework.session:spring-session:1.0.2.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-redis')
+    
     testCompile('org.springframework.boot:spring-boot-starter-test') 
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
+}
+
+bootRun  {
+    addResources = true
+}
+
+//Special for heroku
+task stage(type: Copy, dependsOn: [clean, build]) {
+    from jar.archivePath
+    into project.rootDir
+    rename {
+        'app.jar'
+    }
+}
+
+stage.mustRunAfter(clean)
+clean << {
+    project.file('app.jar').delete()
 }
