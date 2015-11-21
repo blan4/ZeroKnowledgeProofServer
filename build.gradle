@@ -9,7 +9,7 @@ buildscript {
     dependencies {
         classpath 'org.springframework:springloaded:1.2.4.RELEASE'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}" 
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
     }
 }
 
@@ -56,17 +56,17 @@ dependencies {
     compile('com.google.zxing:core:3.2.1')
     compile('com.domingosuarez.boot:spring-boot-starter-jade4j:0.3.1')
     compile('org.springframework.boot:spring-boot-starter-web')
-    
+
     compile('org.springframework.boot:spring-boot-starter-jdbc')
     runtime('org.postgresql:postgresql:9.4-1201-jdbc41')
     compile('org.mybatis:mybatis:3.3.0')
     compile('org.mybatis:mybatis-spring:1.2.3')
     compile('org.flywaydb:flyway-core:3.2.1')
-    
+
     compile('org.springframework.session:spring-session:1.0.2.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-redis')
-    
-    testCompile('org.springframework.boot:spring-boot-starter-test') 
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
 task wrapper(type: Wrapper) {
@@ -78,7 +78,7 @@ bootRun  {
 }
 
 //Special for heroku
-task stage(type: Copy, dependsOn: [clean, build]) {
+task stage(type: Copy, dependsOn: [clean, assemble]) {
     from jar.archivePath
     into project.rootDir
     rename {
