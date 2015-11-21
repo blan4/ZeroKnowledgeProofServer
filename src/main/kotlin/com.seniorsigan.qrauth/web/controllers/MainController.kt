@@ -2,7 +2,11 @@ package com.seniorsigan.qrauth.web.controllers
 
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
+import com.seniorsigan.qrauth.core.DigestGenerator
+import com.seniorsigan.qrauth.web.models.SignUpForm
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
@@ -11,14 +15,56 @@ import java.awt.image.BufferedImage
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
+import javax.servlet.http.HttpServletRequest
 
 @Controller
-class MainController {
+class MainController 
+@Autowired constructor(val service: DigestGenerator) {
+    val users: MutableMap<String, String> = hashMapOf()
+    
     
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun index(): String {
-        return "Hello World!"
+    fun index(request: HttpServletRequest): String {
+        val user = request.getAttribute("user")
+        if (user != null) {
+            return user as String
+        } else {
+            return "Hello Anon"
+        }
+    }
+
+    @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun login(@ModelAttribute form: SignUpForm, request: HttpServletRequest): String {
+        if (form.key.isBlank() || form.login.isBlank()) {
+            return "invalid login form"
+        }
+        val key = users[form.login]
+        if (key != null) {
+            val nextKey = service.generate(form.key)
+            if (key == nextKey) {
+                users[form.login] = form.key
+                request.session.setAttribute("user", form.login)
+                return "logged in"
+            }
+        }
+        return "fail"
+    }
+    
+    @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun signUp(@ModelAttribute form: SignUpForm): String {
+        if (form.key.isBlank() || form.login.isBlank()) {
+            return "invalid signUp form"
+        }
+        
+        if (users[form.login] == null) {
+            users[form.login] = form.key
+            return "success"
+        }
+        
+        return "fail: user already exists"
     }
     
     @RequestMapping(value = "/generateCode", method = arrayOf(RequestMethod.GET))
