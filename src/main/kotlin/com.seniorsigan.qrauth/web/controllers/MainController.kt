@@ -4,6 +4,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.seniorsigan.qrauth.core.DigestGenerator
 import com.seniorsigan.qrauth.web.models.SignUpForm
+import com.seniorsigan.qrauth.web.services.SessionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -19,18 +20,21 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-class MainController 
-@Autowired constructor(val service: DigestGenerator) {
+class MainController
+@Autowired constructor(
+    val service: DigestGenerator,
+    val sessionService: SessionService
+) {
     val users: MutableMap<String, String> = hashMapOf()
-    
-    
+
+
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
         val user = request.session.getAttribute("user")
         if (user != null) {
             model.addAttribute("user", user as String)
         }
-        println(request.session.id)
+        sessionService.show(request.session.id)
         return "index"
     }
 
@@ -51,22 +55,22 @@ class MainController
         }
         return "fail"
     }
-    
+
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun signUp(@ModelAttribute form: SignUpForm): String {
         if (form.key.isBlank() || form.login.isBlank()) {
             return "invalid signUp form"
         }
-        
+
         if (users[form.login] == null) {
             users[form.login] = form.key
             return "success"
         }
-        
+
         return "fail: user already exists"
     }
-    
+
     @RequestMapping(value = "/generateCode", method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun generateQRCode(response: ServletResponse) {
@@ -78,7 +82,7 @@ class MainController
         graphics.color = Color.WHITE
         graphics.fillRect(0, 0, bitmap.width, bitmap.height)
         graphics.color = Color.BLACK
-        
+
         for (x in 0..bitmap.width - 1) {
             for (y in 0..bitmap.height - 1) {
                 if (bitmap.get(x, y)) {
@@ -86,7 +90,7 @@ class MainController
                 }
             }
         }
-        
+
         response.contentType = "image/png"
         ImageIO.write(image, "png", response.outputStream)
     }
