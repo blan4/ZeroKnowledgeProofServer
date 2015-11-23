@@ -3,15 +3,17 @@ package com.seniorsigan.qrauth.config
 import org.apache.ibatis.session.SqlSessionFactory
 import org.flywaydb.core.Flyway
 import org.mybatis.spring.SqlSessionFactoryBean
+import org.mybatis.spring.annotation.MapperScan
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import javax.sql.DataSource
 
 @Configuration
+@MapperScan(basePackages = arrayOf("com.seniorsigan.qrauth.core.mappers"))
 open class DatabaseConfig {
     @Autowired
-    public var dataSource: DataSource? = null
+    lateinit public var dataSource: DataSource
 
     @Bean(initMethod = "migrate")
     open fun flyway(): Flyway {

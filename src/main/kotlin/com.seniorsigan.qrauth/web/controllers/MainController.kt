@@ -3,6 +3,11 @@ package com.seniorsigan.qrauth.web.controllers
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.seniorsigan.qrauth.core.DigestGenerator
+import com.seniorsigan.qrauth.core.models.LoginRequest
+import com.seniorsigan.qrauth.core.models.User
+import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
+import com.seniorsigan.qrauth.core.repositories.UserRepository
+import com.seniorsigan.qrauth.web.models.SignInForm
 import com.seniorsigan.qrauth.web.models.SignUpForm
 import com.seniorsigan.qrauth.web.services.SessionService
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import java.awt.Color
 import java.awt.image.BufferedImage
+import java.sql.Timestamp
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
@@ -23,10 +29,11 @@ import javax.servlet.http.HttpServletRequest
 class MainController
 @Autowired constructor(
     val service: DigestGenerator,
-    val sessionService: SessionService
+    val sessionService: SessionService,
+    val userRepository: UserRepository,
+    val loginRequestRepository: LoginRequestRepository
 ) {
     val users: MutableMap<String, String> = hashMapOf()
-
 
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
@@ -34,26 +41,49 @@ class MainController
         if (user != null) {
             model.addAttribute("user", user as String)
         }
-        sessionService.show(request.session.id)
         return "index"
     }
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun login(@ModelAttribute form: SignUpForm, request: HttpServletRequest): String {
-        if (form.key.isBlank() || form.login.isBlank()) {
+    fun login(@ModelAttribute form: SignInForm, request: HttpServletRequest): String {
+        println("Get login form $form")
+        if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return "invalid login form"
         }
-        val key = users[form.login]
-        if (key != null) {
+        val loginRequest = loginRequestRepository.findByToken(form.token)
+        if (loginRequest == null) {
+            return "Can't find login request by token"
+        }
+        if (loginRequest.expiresAt <= Date()) {
+            loginRequestRepository.delete(loginRequest)
+            return "Login request expired"
+        }
+        val user = userRepository.find(form.login)
+        if (user != null) {
             val nextKey = service.generate(form.key)
-            if (key == nextKey) {
-                users[form.login] = form.key
-                request.session.setAttribute("user", form.login)
-                return "logged in"
+            if (nextKey == user.token) {
+                user.token = form.key
+                userRepository.update(user)
+                sessionService.bound(loginRequest.sessionId, user.login)
+                println("User $user logged in")
+                return "user logged in"
             }
         }
-        return "fail"
+
+        return "Can't find user"
+    }
+
+    @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
+    @ResponseBody
+    fun requestLogin(request: HttpServletRequest): String {
+        val sessionId = request.requestedSessionId
+        val uuid = UUID.randomUUID().toString()
+        val expiresAt = Timestamp(Date().time + 1000 * 60)
+        val loginRequest = LoginRequest(sessionId = sessionId, token = uuid, expiresAt = expiresAt)
+        loginRequestRepository.save(loginRequest)
+
+        return loginRequest.token
     }
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
@@ -63,12 +93,15 @@ class MainController
             return "invalid signUp form"
         }
 
-        if (users[form.login] == null) {
-            users[form.login] = form.key
-            return "success"
+        if (userRepository.find(form.login) != null) {
+            return "user with login ${form.login} already exists"
         }
 
-        return "fail: user already exists"
+        val user = User(login = form.login, token = form.key)
+        userRepository.save(user)
+
+        println("Created user $user")
+        return "success created user with login ${user.login}"
     }
 
     @RequestMapping(value = "/generateCode", method = arrayOf(RequestMethod.GET))

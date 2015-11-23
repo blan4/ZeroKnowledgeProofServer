@@ -1,14 +1,14 @@
 extends layout
 
 block append content
-  if user 
+  if user
     p Hello #{user}
   else
-    form(action="/login", method="post")
+    form(action="/signup", method="post")
       .form-group
         label(for="login-input") Login
         input#login-input.form-control(name="login", placeholder="Your login", type="text")
       .form-group
         label(for="key-input") Password
         input#key-input.form-control(name="key", placeholder="Your key", type="password")
-      button.btn.btn-success(type="submit") Login
+      button.btn.btn-success(type="submit") Sign up

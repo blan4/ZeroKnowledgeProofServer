@@ -10,13 +10,9 @@ class SessionService
 @Autowired constructor(
     val template: RedisTemplate<String, ExpiringSession>
 ) {
-    fun show(id: String) {
-        val bound = template.boundHashOps<String, Any>(getId(id))
-        val entries = bound.entries()
-        for ((k, v) in entries) {
-            println("$k: $v")
-        }
-        bound.put("sessionAttr:user", "blan4")
+    fun bound(sessionId: String, login: String) {
+        val bound = template.boundHashOps<String, Any>(getId(sessionId))
+        bound.put("sessionAttr:user", login)
     }
 
     fun getId(id: String): String {
