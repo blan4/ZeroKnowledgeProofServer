@@ -1,3 +1,6 @@
+domainName: 'qr-auth.herokuapp.com'
+loginPath: '/login'
+
 spring:
   datasource:
     url: ${SPRING_DB_URL}
