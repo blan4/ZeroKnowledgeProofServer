@@ -9,7 +9,9 @@ import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
 import com.seniorsigan.qrauth.core.repositories.UserRepository
 import com.seniorsigan.qrauth.web.models.SignInForm
 import com.seniorsigan.qrauth.web.models.SignUpForm
+import com.seniorsigan.qrauth.web.models.Token
 import com.seniorsigan.qrauth.web.services.SessionService
+import com.seniorsigan.qrauth.web.services.TokenGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.sql.Timestamp
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
@@ -31,7 +32,8 @@ class MainController
     val service: DigestGenerator,
     val sessionService: SessionService,
     val userRepository: UserRepository,
-    val loginRequestRepository: LoginRequestRepository
+    val loginRequestRepository: LoginRequestRepository,
+    val tokenGenerator: TokenGenerator
 ) {
     val users: MutableMap<String, String> = hashMapOf()
 
@@ -46,7 +48,7 @@ class MainController
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun login(@ModelAttribute form: SignInForm, request: HttpServletRequest): String {
+    fun login(@ModelAttribute form: SignInForm): String {
         println("Get login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return "invalid login form"
@@ -76,14 +78,13 @@ class MainController
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
     @ResponseBody
-    fun requestLogin(request: HttpServletRequest): String {
+    fun requestLogin(request: HttpServletRequest): Token {
         val sessionId = request.requestedSessionId
-        val uuid = UUID.randomUUID().toString()
-        val expiresAt = Timestamp(Date().time + 1000 * 60)
-        val loginRequest = LoginRequest(sessionId = sessionId, token = uuid, expiresAt = expiresAt)
+        val token = tokenGenerator.generate()
+        val loginRequest = LoginRequest(sessionId = sessionId, token = token.requestToken, expiresAt = token.expiresAt)
         loginRequestRepository.save(loginRequest)
 
-        return loginRequest.token
+        return token
     }
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))

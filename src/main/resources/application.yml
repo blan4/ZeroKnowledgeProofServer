@@ -1,3 +1,6 @@
+domainName: 'localhost'
+loginPath: '/login'
+
 server:
   port: 9000
 
