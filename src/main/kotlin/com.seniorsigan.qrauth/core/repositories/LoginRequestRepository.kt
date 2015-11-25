@@ -20,7 +20,25 @@ open class LoginRequestRepository
         return mapper.findByToken(token)
     }
 
+    open fun findBySession(sessionId: String): LoginRequest? {
+        return mapper.findBySession(sessionId)
+    }
+
     open fun delete(loginRequest: LoginRequest) {
         return mapper.delete(loginRequest)
+    }
+
+    open fun saveOrUpdate(loginRequest: LoginRequest) {
+        val savedLoginRequest = findBySession(loginRequest.sessionId)
+        if (savedLoginRequest != null) {
+            loginRequest.id = savedLoginRequest.id
+            update(loginRequest)
+        } else {
+            save(loginRequest)
+        }
+    }
+
+    open fun update(loginRequest: LoginRequest) {
+        return mapper.update(loginRequest)
     }
 }

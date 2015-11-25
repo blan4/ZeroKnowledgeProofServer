@@ -1,7 +1,5 @@
 package com.seniorsigan.qrauth.web.controllers
 
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
 import com.seniorsigan.qrauth.core.DigestGenerator
 import com.seniorsigan.qrauth.core.models.LoginRequest
 import com.seniorsigan.qrauth.core.models.User
@@ -9,7 +7,7 @@ import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
 import com.seniorsigan.qrauth.core.repositories.UserRepository
 import com.seniorsigan.qrauth.web.models.SignInForm
 import com.seniorsigan.qrauth.web.models.SignUpForm
-import com.seniorsigan.qrauth.web.models.Token
+import com.seniorsigan.qrauth.web.services.QRCodeGenerator
 import com.seniorsigan.qrauth.web.services.SessionService
 import com.seniorsigan.qrauth.web.services.TokenGenerator
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
-import java.awt.Color
-import java.awt.image.BufferedImage
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
@@ -33,7 +29,8 @@ class MainController
     val sessionService: SessionService,
     val userRepository: UserRepository,
     val loginRequestRepository: LoginRequestRepository,
-    val tokenGenerator: TokenGenerator
+    val tokenGenerator: TokenGenerator,
+    val qrCodeGenerator: QRCodeGenerator
 ) {
     val users: MutableMap<String, String> = hashMapOf()
 
@@ -77,14 +74,15 @@ class MainController
     }
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun requestLogin(request: HttpServletRequest): Token {
+    fun requestLogin(request: HttpServletRequest, response: ServletResponse) {
         val sessionId = request.requestedSessionId
         val token = tokenGenerator.generate()
         val loginRequest = LoginRequest(sessionId = sessionId, token = token.requestToken, expiresAt = token.expiresAt)
-        loginRequestRepository.save(loginRequest)
+        loginRequestRepository.saveOrUpdate(loginRequest)
+        val image = qrCodeGenerator.generateFromObject(token)
 
-        return token
+        response.contentType = "image/png"
+        ImageIO.write(image, "png", response.outputStream)
     }
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
@@ -103,29 +101,5 @@ class MainController
 
         println("Created user $user")
         return "success created user with login ${user.login}"
-    }
-
-    @RequestMapping(value = "/generateCode", method = arrayOf(RequestMethod.GET))
-    @ResponseBody
-    fun generateQRCode(response: ServletResponse) {
-        val uuid = UUID.randomUUID().toString()
-        val writer = MultiFormatWriter()
-        val bitmap = writer.encode(uuid, BarcodeFormat.QR_CODE, 400, 400)
-        val image = BufferedImage(bitmap.width, bitmap.height, BufferedImage.TYPE_INT_RGB)
-        val graphics = image.graphics
-        graphics.color = Color.WHITE
-        graphics.fillRect(0, 0, bitmap.width, bitmap.height)
-        graphics.color = Color.BLACK
-
-        for (x in 0..bitmap.width - 1) {
-            for (y in 0..bitmap.height - 1) {
-                if (bitmap.get(x, y)) {
-                    graphics.fillRect(x, y, 1, 1)
-                }
-            }
-        }
-
-        response.contentType = "image/png"
-        ImageIO.write(image, "png", response.outputStream)
     }
 }

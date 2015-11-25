@@ -1,5 +1,6 @@
 package com.seniorsigan.qrauth.web.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.seniorsigan.qrauth.web.models.Token
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
