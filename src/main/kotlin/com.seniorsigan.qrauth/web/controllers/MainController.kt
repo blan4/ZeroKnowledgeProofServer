@@ -2,11 +2,13 @@ package com.seniorsigan.qrauth.web.controllers
 
 import com.seniorsigan.qrauth.core.DigestGenerator
 import com.seniorsigan.qrauth.core.models.LoginRequest
+import com.seniorsigan.qrauth.core.models.SignupRequest
 import com.seniorsigan.qrauth.core.models.User
 import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
+import com.seniorsigan.qrauth.core.repositories.SignupRequestRepository
 import com.seniorsigan.qrauth.core.repositories.UserRepository
 import com.seniorsigan.qrauth.web.models.SignInForm
-import com.seniorsigan.qrauth.web.models.SignUpForm
+import com.seniorsigan.qrauth.web.models.SignupForm
 import com.seniorsigan.qrauth.web.services.QRCodeGenerator
 import com.seniorsigan.qrauth.web.services.SessionService
 import com.seniorsigan.qrauth.web.services.TokenGenerator
@@ -30,7 +32,8 @@ class MainController
     val userRepository: UserRepository,
     val loginRequestRepository: LoginRequestRepository,
     val tokenGenerator: TokenGenerator,
-    val qrCodeGenerator: QRCodeGenerator
+    val qrCodeGenerator: QRCodeGenerator,
+    val signupRequestRepository: SignupRequestRepository
 ) {
     val users: MutableMap<String, String> = hashMapOf()
 
@@ -76,9 +79,21 @@ class MainController
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
     fun requestLogin(request: HttpServletRequest, response: ServletResponse) {
         val sessionId = request.requestedSessionId
-        val token = tokenGenerator.generate()
-        val loginRequest = LoginRequest(sessionId = sessionId, token = token.requestToken, expiresAt = token.expiresAt)
+        val token = tokenGenerator.generateLogin()
+        val loginRequest = LoginRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
         loginRequestRepository.saveOrUpdate(loginRequest)
+        val image = qrCodeGenerator.generateFromObject(token)
+
+        response.contentType = "image/png"
+        ImageIO.write(image, "png", response.outputStream)
+    }
+
+    @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.GET))
+    fun requestSignUp(request: HttpServletRequest, response: ServletResponse) {
+        val sessionId = request.requestedSessionId
+        val token = tokenGenerator.generateSignup()
+        val signupRequest = SignupRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
+        signupRequestRepository.saveOrUpdate(signupRequest)
         val image = qrCodeGenerator.generateFromObject(token)
 
         response.contentType = "image/png"
@@ -87,17 +102,29 @@ class MainController
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun signUp(@ModelAttribute form: SignUpForm): String {
-        if (form.key.isBlank() || form.login.isBlank()) {
-            return "invalid signUp form"
+    fun signUp(@ModelAttribute form: SignupForm): String {
+        println("Get signup form $form")
+        if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
+            return "invalid signup form"
         }
 
         if (userRepository.find(form.login) != null) {
             return "user with login ${form.login} already exists"
         }
 
+        val signupRequest = signupRequestRepository.findByToken(form.token)
+        if (signupRequest == null) {
+            return "Can't find signup request by token"
+        }
+
+        if (signupRequest.expiresAt <= Date()) {
+            signupRequestRepository.delete(signupRequest)
+            return "Signup request expired"
+        }
+
         val user = User(login = form.login, token = form.key)
         userRepository.save(user)
+        sessionService.bound(signupRequest.sessionId, user.login)
 
         println("Created user $user")
         return "success created user with login ${user.login}"

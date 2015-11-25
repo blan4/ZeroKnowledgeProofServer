@@ -1,8 +1,6 @@
 package com.seniorsigan.qrauth.web.services
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.seniorsigan.qrauth.web.models.Token
-import org.springframework.beans.factory.annotation.Autowired
+import com.seniorsigan.qrauth.web.models.LoginToken
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
@@ -15,9 +13,18 @@ class TokenGenerator {
     @Value("\${loginPath}")
     lateinit var loginPath: String
 
-    fun generate(): Token {
+    @Value("\${signupPath}")
+    lateinit var signupPath: String
+
+    fun generateLogin(): LoginToken {
         val uuid = UUID.randomUUID().toString()
         val expiresAt = Date(Date().time + 1000 * 60)
-        return Token(domainName, uuid, loginPath, expiresAt)
+        return LoginToken(domainName, uuid, loginPath, expiresAt)
+    }
+
+    fun generateSignup(): LoginToken {
+        val uuid = UUID.randomUUID().toString()
+        val expiresAt = Date(Date().time + 1000 * 180)
+        return LoginToken(domainName, uuid, signupPath, expiresAt)
     }
 }

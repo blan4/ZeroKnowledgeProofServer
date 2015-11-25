@@ -3,7 +3,6 @@ package com.seniorsigan.qrauth.web.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
-import com.seniorsigan.qrauth.web.models.Token
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.awt.Color

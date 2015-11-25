@@ -1,5 +1,6 @@
 domainName: 'localhost'
 loginPath: '/login'
+signupPath: '/signup'
 
 server:
   port: 9000
