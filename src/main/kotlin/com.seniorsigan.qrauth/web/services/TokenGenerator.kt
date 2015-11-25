@@ -1,6 +1,7 @@
 package com.seniorsigan.qrauth.web.services
 
 import com.seniorsigan.qrauth.web.models.LoginToken
+import com.seniorsigan.qrauth.web.models.SignupToken
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
@@ -22,9 +23,9 @@ class TokenGenerator {
         return LoginToken(domainName, uuid, loginPath, expiresAt)
     }
 
-    fun generateSignup(): LoginToken {
+    fun generateSignup(): SignupToken {
         val uuid = UUID.randomUUID().toString()
         val expiresAt = Date(Date().time + 1000 * 180)
-        return LoginToken(domainName, uuid, signupPath, expiresAt)
+        return SignupToken(domainName, uuid, signupPath, expiresAt)
     }
 }
