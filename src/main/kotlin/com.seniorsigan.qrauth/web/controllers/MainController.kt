@@ -7,6 +7,7 @@ import com.seniorsigan.qrauth.core.models.User
 import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
 import com.seniorsigan.qrauth.core.repositories.SignupRequestRepository
 import com.seniorsigan.qrauth.core.repositories.UserRepository
+import com.seniorsigan.qrauth.web.models.CommonResponse
 import com.seniorsigan.qrauth.web.models.SignInForm
 import com.seniorsigan.qrauth.web.models.SignupForm
 import com.seniorsigan.qrauth.web.services.QRCodeGenerator
@@ -35,8 +36,6 @@ class MainController
     val qrCodeGenerator: QRCodeGenerator,
     val signupRequestRepository: SignupRequestRepository
 ) {
-    val users: MutableMap<String, String> = hashMapOf()
-
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
         val user = request.session.getAttribute("user")
@@ -48,18 +47,18 @@ class MainController
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun login(@ModelAttribute form: SignInForm): String {
+    fun login(@ModelAttribute form: SignInForm): CommonResponse {
         println("Get login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
-            return "invalid login form"
+            return CommonResponse(false, "invalid login form")
         }
         val loginRequest = loginRequestRepository.findByToken(form.token)
         if (loginRequest == null) {
-            return "Can't find login request by token"
+            return CommonResponse(false, "Can't find login request by token")
         }
         if (loginRequest.expiresAt <= Date()) {
             loginRequestRepository.delete(loginRequest)
-            return "Login request expired"
+            return CommonResponse(false, "Login request expired")
         }
         val user = userRepository.find(form.login)
         if (user != null) {
@@ -69,11 +68,11 @@ class MainController
                 userRepository.update(user)
                 sessionService.bound(loginRequest.sessionId, user.login)
                 println("User $user logged in")
-                return "user logged in"
+                return CommonResponse(true, "", "user logged in")
             }
         }
 
-        return "Can't find user"
+        return CommonResponse(false, "Can't find user")
     }
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
@@ -102,24 +101,24 @@ class MainController
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun signUp(@ModelAttribute form: SignupForm): String {
+    fun signUp(@ModelAttribute form: SignupForm): CommonResponse {
         println("Get signup form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
-            return "invalid signup form"
+            return CommonResponse(false, "invalid signup form")
         }
 
         if (userRepository.find(form.login) != null) {
-            return "user with login ${form.login} already exists"
+            return CommonResponse(false, "user with login ${form.login} already exists")
         }
 
         val signupRequest = signupRequestRepository.findByToken(form.token)
         if (signupRequest == null) {
-            return "Can't find signup request by token"
+            return CommonResponse(false, "Can't find signup request by token")
         }
 
         if (signupRequest.expiresAt <= Date()) {
             signupRequestRepository.delete(signupRequest)
-            return "Signup request expired"
+            return CommonResponse(false, "Signup request expired")
         }
 
         val user = User(login = form.login, token = form.key)
@@ -127,6 +126,6 @@ class MainController
         sessionService.bound(signupRequest.sessionId, user.login)
 
         println("Created user $user")
-        return "success created user with login ${user.login}"
+        return CommonResponse(true, "", "success created user with login ${user.login}")
     }
 }
