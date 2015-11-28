@@ -16,10 +16,7 @@ import com.seniorsigan.qrauth.web.services.TokenGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
@@ -47,7 +44,7 @@ class MainController
 
     @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun login(@ModelAttribute form: SignInForm): CommonResponse {
+    fun login(@RequestBody form: SignInForm): CommonResponse {
         println("Get login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid login form")
@@ -101,7 +98,7 @@ class MainController
 
     @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun signUp(@ModelAttribute form: SignupForm): CommonResponse {
+    fun signUp(@RequestBody form: SignupForm): CommonResponse {
         println("Get signup form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid signup form")
