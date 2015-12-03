@@ -1,8 +1,6 @@
 package com.seniorsigan.qrauth.web.controllers
 
 import com.seniorsigan.qrauth.core.DigestGenerator
-import com.seniorsigan.qrauth.core.models.LoginRequest
-import com.seniorsigan.qrauth.core.models.SignupRequest
 import com.seniorsigan.qrauth.core.models.User
 import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
 import com.seniorsigan.qrauth.core.repositories.SignupRequestRepository
@@ -16,11 +14,15 @@ import com.seniorsigan.qrauth.web.services.TokenGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.ResponseBody
 import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Controller
 class MainController
@@ -72,24 +74,18 @@ class MainController
         return CommonResponse(false, "Can't find user")
     }
 
-    @RequestMapping(value = "/login", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/login.png", method = arrayOf(RequestMethod.GET))
     fun requestLogin(request: HttpServletRequest, response: ServletResponse) {
-        val sessionId = request.requestedSessionId
-        val token = tokenGenerator.generateLogin()
-        val loginRequest = LoginRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
-        loginRequestRepository.saveOrUpdate(loginRequest)
+        val token = tokenGenerator.createLogin(request)
         val image = qrCodeGenerator.generateFromObject(token)
 
         response.contentType = "image/png"
         ImageIO.write(image, "png", response.outputStream)
     }
 
-    @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/signup.png", method = arrayOf(RequestMethod.GET))
     fun requestSignUp(request: HttpServletRequest, response: ServletResponse) {
-        val sessionId = request.requestedSessionId
-        val token = tokenGenerator.generateSignup()
-        val signupRequest = SignupRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
-        signupRequestRepository.saveOrUpdate(signupRequest)
+        val token = tokenGenerator.createSignup(request)
         val image = qrCodeGenerator.generateFromObject(token)
 
         response.contentType = "image/png"
