@@ -62,6 +62,7 @@ class MainController
                 user.token = form.key
                 userRepository.update(user)
                 sessionService.bound(loginRequest.sessionId, user.login)
+                loginRequestRepository.delete(loginRequest)
                 println("User $user logged in")
                 return CommonResponse(true, "", "user logged in")
             }
@@ -109,6 +110,7 @@ class MainController
 
         val user = User(login = form.login, token = form.key)
         userRepository.save(user)
+        signupRequestRepository.delete(signupRequest)
         sessionService.bound(signupRequest.sessionId, user.login)
 
         println("Created user $user")
