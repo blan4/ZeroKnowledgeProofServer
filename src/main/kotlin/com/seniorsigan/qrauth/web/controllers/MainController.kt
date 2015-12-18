@@ -22,7 +22,6 @@ import java.util.*
 import javax.imageio.ImageIO
 import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @Controller
 class MainController
@@ -51,10 +50,7 @@ class MainController
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid login form")
         }
-        val loginRequest = loginRequestRepository.findByToken(form.token)
-        if (loginRequest == null) {
-            return CommonResponse(false, "Can't find login request by token")
-        }
+        val loginRequest = loginRequestRepository.findByToken(form.token) ?: return CommonResponse(false, "Can't find login request by token")
         if (loginRequest.expiresAt <= Date()) {
             loginRequestRepository.delete(loginRequest)
             return CommonResponse(false, "Login request expired")
@@ -104,10 +100,7 @@ class MainController
             return CommonResponse(false, "user with login ${form.login} already exists")
         }
 
-        val signupRequest = signupRequestRepository.findByToken(form.token)
-        if (signupRequest == null) {
-            return CommonResponse(false, "Can't find signup request by token")
-        }
+        val signupRequest = signupRequestRepository.findByToken(form.token) ?: return CommonResponse(false, "Can't find signup request by token")
 
         if (signupRequest.expiresAt <= Date()) {
             signupRequestRepository.delete(signupRequest)

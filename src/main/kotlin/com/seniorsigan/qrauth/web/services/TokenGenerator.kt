@@ -40,7 +40,7 @@ class TokenGenerator
     }
 
     fun createLogin(request: HttpServletRequest): LoginToken {
-        val sessionId = request.requestedSessionId
+        val sessionId = request.session.id
         val token = generateLogin()
         val loginRequest = LoginRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
         loginRequestRepository.saveOrUpdate(loginRequest)
@@ -48,7 +48,7 @@ class TokenGenerator
     }
 
     fun createSignup(request: HttpServletRequest): SignupToken {
-        val sessionId = request.requestedSessionId
+        val sessionId = request.session.id
         val token = generateSignup()
         val signupRequest = SignupRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
         signupRequestRepository.saveOrUpdate(signupRequest)
