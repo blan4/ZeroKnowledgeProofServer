@@ -1,5 +1,6 @@
 package com.seniorsigan.qrauth.web.services
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.seniorsigan.qrauth.core.models.LoginRequest
 import com.seniorsigan.qrauth.core.models.SignupRequest
 import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
@@ -16,7 +17,8 @@ import javax.servlet.http.HttpServletRequest
 class TokenGenerator
 @Autowired constructor(
     val loginRequestRepository: LoginRequestRepository,
-    val signupRequestRepository: SignupRequestRepository
+    val signupRequestRepository: SignupRequestRepository,
+    val objectMapper: ObjectMapper
 ) {
     @Value("\${domainName}")
     lateinit var domainName: String
@@ -47,11 +49,21 @@ class TokenGenerator
         return token
     }
 
+    fun createLoginJson(request: HttpServletRequest): String {
+        val token = createLogin(request)
+        return objectMapper.writeValueAsString(token)
+    }
+
     fun createSignup(request: HttpServletRequest): SignupToken {
         val sessionId = request.session.id
         val token = generateSignup()
         val signupRequest = SignupRequest(sessionId = sessionId, token = token.token, expiresAt = token.expiresAt)
         signupRequestRepository.saveOrUpdate(signupRequest)
         return token
+    }
+
+    fun createSignupJson(request: HttpServletRequest): String {
+        val token = createSignup(request)
+        return objectMapper.writeValueAsString(token)
     }
 }

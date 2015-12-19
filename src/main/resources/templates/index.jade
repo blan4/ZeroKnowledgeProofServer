@@ -5,5 +5,10 @@ block append content
     p Hello #{user}
   else
     p Hello Anonymous
-    a(href="/signup.png") Singup
-    a(href="/login.png") Login
+    .desktop
+      a(href="/signup.png") Singup
+      a(href="/login.png") Login
+
+    .mobile
+      a(href="qrauth://login?token=#{loginToken}") Mobile Login
+      a(href="qrauth://signup?token=#{signupToken}") Mobile Signup

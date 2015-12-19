@@ -5,6 +5,7 @@ import com.seniorsigan.qrauth.core.models.User
 import com.seniorsigan.qrauth.core.repositories.LoginRequestRepository
 import com.seniorsigan.qrauth.core.repositories.SignupRequestRepository
 import com.seniorsigan.qrauth.core.repositories.UserRepository
+import com.seniorsigan.qrauth.core.toBase64
 import com.seniorsigan.qrauth.web.models.CommonResponse
 import com.seniorsigan.qrauth.web.models.SignInForm
 import com.seniorsigan.qrauth.web.models.SignupForm
@@ -39,6 +40,11 @@ class MainController
         val user = request.session.getAttribute("user")
         if (user != null) {
             model.addAttribute("user", user as String)
+        } else {
+            val loginToken = tokenGenerator.createLoginJson(request)
+            val signupToken = tokenGenerator.createSignupJson(request)
+            model.addAttribute("loginToken", loginToken.toBase64())
+            model.addAttribute("signupToken", signupToken.toBase64())
         }
         return "index"
     }
