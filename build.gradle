@@ -26,7 +26,7 @@ idea {
 }
 
 jar {
-    baseName = 'qrauth'
+    baseName = 'zkpauth'
     version = '0.0.1-SNAPSHOT'
 }
 

@@ -1,3 +1,3 @@
-#QRAuthenticator
+#Zero-knowledge proof Authentication
 
-Proof of a concept.
+Server side example for zkp-protocol.
