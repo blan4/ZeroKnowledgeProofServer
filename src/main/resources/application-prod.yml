@@ -1,4 +1,4 @@
-domainName: 'qr-auth.herokuapp.com'
+domainName: 'zkpauth.herokuapp.com'
 loginPath: '/login'
 signupPath: '/signup'
 
