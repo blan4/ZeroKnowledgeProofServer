@@ -7,20 +7,17 @@ import org.springframework.stereotype.Repository
 
 @Repository
 open class UserRepository
-@Autowired constructor(val mapper: UserMapper){
-    open fun findAll(): List<User> {
-        return mapper.findAll()
-    }
+@Autowired constructor(
+    val mapper: UserMapper
+): AnyUserRepository<User> {
+    internal fun findAllByAlgorithm(algorithm: String): List<User> = mapper.findAllByAlgorithm(algorithm)
+    internal fun findByAlgorithm(login: String, algorithm: String): User? = mapper.findByAlgorithm(login, algorithm)
 
-    open fun save(user: User) {
-        return mapper.save(user)
-    }
+    override fun findAll(): List<User> = mapper.findAll()
 
-    open fun update(user: User) {
-        return mapper.update(user)
-    }
+    override fun save(user: User) = mapper.save(user)
 
-    open fun find(login: String): User? {
-        return mapper.find(login)
-    }
+    override fun update(user: User) = mapper.update(user)
+
+    override fun find(login: String): User? = mapper.find(login)
 }

@@ -1,7 +1,9 @@
 package org.seniorsigan.zkpauth.web.controllers
 
-import org.seniorsigan.zkpauth.core.models.User
+import org.seniorsigan.zkpauth.core.models.SKeySecret
+import org.seniorsigan.zkpauth.core.models.SKeyUser
 import org.seniorsigan.zkpauth.core.repositories.LoginRequestRepository
+import org.seniorsigan.zkpauth.core.repositories.SKeyUserRepository
 import org.seniorsigan.zkpauth.core.repositories.SignupRequestRepository
 import org.seniorsigan.zkpauth.core.repositories.UserRepository
 import org.seniorsigan.zkpauth.core.services.DigestGenerator
@@ -29,7 +31,7 @@ class MainController
 @Autowired constructor(
     val service: DigestGenerator,
     val sessionService: SessionService,
-    val userRepository: UserRepository,
+    val userRepository: SKeyUserRepository,
     val loginRequestRepository: LoginRequestRepository,
     val tokenGenerator: TokenGenerator,
     val qrCodeGenerator: QRCodeGenerator,
@@ -114,7 +116,7 @@ class MainController
             return CommonResponse(false, "Signup request expired")
         }
 
-        val user = User(login = form.login, token = form.key)
+        val user = SKeyUser(login = form.login, secret = SKeySecret(form.key))
         userRepository.save(user)
         signupRequestRepository.delete(signupRequest)
         sessionService.bound(signupRequest.sessionId, user.login)
