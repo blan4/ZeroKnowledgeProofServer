@@ -7,5 +7,6 @@ data class LoginToken(
     val token: String,
     val path: String,
     val expiresAt: Date,
-    val type: String = "LOGIN"
+    val type: String = "LOGIN",
+    val algorithm: String = "s/key"
 )
