@@ -47,8 +47,8 @@ class MainController
             model.addAttribute("sKeyLoginToken", sKeyLoginToken.toBase64())
             model.addAttribute("sKeySignupToken", sKeySignupToken.toBase64())
 
-            val schonorrLoginToken = sKeyTokenGenerator.createLoginJson(request)
-            val schonorrSignupToken = sKeyTokenGenerator.createSignupJson(request)
+            val schonorrLoginToken = schonorrTokenGenerator.createLoginJson(request)
+            val schonorrSignupToken = schonorrTokenGenerator.createSignupJson(request)
             model.addAttribute("schonorrLoginToken", schonorrLoginToken.toBase64())
             model.addAttribute("schonorrSignupToken", schonorrSignupToken.toBase64())
         }
