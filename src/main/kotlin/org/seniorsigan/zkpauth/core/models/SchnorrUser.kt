@@ -4,21 +4,21 @@ import java.math.BigInteger
 import java.sql.Timestamp
 import java.util.*
 
-data class SchonorrUser(
+data class SchnorrUser(
     var id: Long = 0L,
     var login: String = "",
-    var secret: SchonorrSecret = SchonorrSecret(),
+    var secret: SchnorrSecret = SchnorrSecret(),
     var createdAt: Timestamp = Timestamp(Date().time),
     var updatedAt: Timestamp = Timestamp(Date().time)
 ) {
-    val algorithm = SchonorrUser.algorithm
+    val algorithm = SchnorrUser.algorithm
 
     companion object {
-        val algorithm = "schonorr"
+        val algorithm = "schnorr"
     }
 }
 
-data class SchonorrSecret(
+data class SchnorrSecret(
     var p: BigInteger = BigInteger.ZERO,
     var q: BigInteger = BigInteger.ZERO,
     var g: BigInteger = BigInteger.ZERO

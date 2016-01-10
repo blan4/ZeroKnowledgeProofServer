@@ -1,6 +1,6 @@
 package org.seniorsigan.zkpauth.web.models
 
-import org.seniorsigan.zkpauth.core.models.SchonorrSecret
+import org.seniorsigan.zkpauth.core.models.SchnorrSecret
 import java.math.BigInteger
 
 data class SignupForm(
@@ -11,7 +11,7 @@ data class SignupForm(
 
 data class SchonorrSignupForm(
     var login: String = "",
-    var key: SchonorrSecret = SchonorrSecret(),
+    var key: SchnorrSecret = SchnorrSecret(),
     var token: String = ""
 ) {
     fun valid(): Boolean {

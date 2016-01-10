@@ -2,10 +2,10 @@ package org.seniorsigan.zkpauth.web.controllers
 
 import org.seniorsigan.zkpauth.core.models.SKeySecret
 import org.seniorsigan.zkpauth.core.models.SKeyUser
-import org.seniorsigan.zkpauth.core.models.SchonorrUser
+import org.seniorsigan.zkpauth.core.models.SchnorrUser
 import org.seniorsigan.zkpauth.core.repositories.*
 import org.seniorsigan.zkpauth.core.services.DigestGenerator
-import org.seniorsigan.zkpauth.core.services.SchonorrService
+import org.seniorsigan.zkpauth.core.services.SchnorrService
 import org.seniorsigan.zkpauth.core.services.toBase64
 import org.seniorsigan.zkpauth.web.models.CommonResponse
 import org.seniorsigan.zkpauth.web.models.LoginForm
@@ -30,13 +30,13 @@ class MainController
     val service: DigestGenerator,
     val sessionService: SessionService,
     val sKeyUserRepository: SKeyUserRepository,
-    val schonorrUserRepository: SchonorrUserRepository,
+    val schnorrUserRepository: SchnorrUserRepository,
     val loginRequestRepository: LoginRequestRepository,
     val sKeyTokenGenerator: SKeyTokenGenerator,
-    val schonorrTokenGenerator: SchonorrTokenGenerator,
+    val schnorrTokenGenerator: SchnorrTokenGenerator,
     val qrCodeGenerator: QRCodeGenerator,
     val signupRequestRepository: SignupRequestRepository,
-    val schonorrService: SchonorrService
+    val schnorrService: SchnorrService
 ) {
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
@@ -49,10 +49,10 @@ class MainController
             model.addAttribute("sKeyLoginToken", sKeyLoginToken.toBase64())
             model.addAttribute("sKeySignupToken", sKeySignupToken.toBase64())
 
-            val schonorrLoginToken = schonorrTokenGenerator.createLoginJson(request)
-            val schonorrSignupToken = schonorrTokenGenerator.createSignupJson(request)
-            model.addAttribute("schonorrLoginToken", schonorrLoginToken.toBase64())
-            model.addAttribute("schonorrSignupToken", schonorrSignupToken.toBase64())
+            val schnorrLoginToken = schnorrTokenGenerator.createLoginJson(request)
+            val schnorrSignupToken = schnorrTokenGenerator.createSignupJson(request)
+            model.addAttribute("schnorrLoginToken", schnorrLoginToken.toBase64())
+            model.addAttribute("schnorrSignupToken", schnorrSignupToken.toBase64())
         }
         return "index"
     }
@@ -97,15 +97,15 @@ class MainController
         buildQRCodeResponse(token, response)
     }
 
-    @RequestMapping(value = "/login/schonorr.png", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/login/schnorr.png", method = arrayOf(RequestMethod.GET))
     fun requestSchonorrLogin(request: HttpServletRequest, response: ServletResponse) {
-        val token = schonorrTokenGenerator.createLogin(request)
+        val token = schnorrTokenGenerator.createLogin(request)
         buildQRCodeResponse(token, response)
     }
 
-    @RequestMapping(value = "/signup/schonorr.png", method = arrayOf(RequestMethod.GET))
+    @RequestMapping(value = "/signup/schnorr.png", method = arrayOf(RequestMethod.GET))
     fun requestSchonorrSignUp(request: HttpServletRequest, response: ServletResponse) {
-        val token = schonorrTokenGenerator.createSignup(request)
+        val token = schnorrTokenGenerator.createSignup(request)
         buildQRCodeResponse(token, response)
     }
 
@@ -144,10 +144,10 @@ class MainController
         return CommonResponse(true, "", "successfully created user with login ${user.login} and algorithm ${user.algorithm}")
     }
 
-    @RequestMapping(value = "/login/schonorr", method = arrayOf(RequestMethod.POST))
+    @RequestMapping(value = "/login/schnorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun schonorrLogin(@RequestBody form: LoginForm): CommonResponse {
-        println("Get schonorr login form $form")
+    fun schnorrLogin(@RequestBody form: LoginForm): CommonResponse {
+        println("Get schnorr login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid login form")
         }
@@ -156,7 +156,7 @@ class MainController
             loginRequestRepository.delete(loginRequest)
             return CommonResponse(false, "Login request expired")
         }
-        val user = schonorrUserRepository.find(form.login)
+        val user = schnorrUserRepository.find(form.login)
 
         if (user != null) {
             return CommonResponse(false, "Not supported")
@@ -165,18 +165,18 @@ class MainController
         return CommonResponse(false, "Can't find user")
     }
 
-    @RequestMapping(value = "/signup/schonorr", method = arrayOf(RequestMethod.POST))
+    @RequestMapping(value = "/signup/schnorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun schonorrSignup(@RequestBody form: SchonorrSignupForm): CommonResponse {
-        println("Get schonorr signup form $form")
+    fun schnorrSignup(@RequestBody form: SchonorrSignupForm): CommonResponse {
+        println("Get schnorr signup form $form")
         if (!form.valid()) {
             return CommonResponse(false, "invalid signup form")
         }
-        if (!schonorrService.isValidPublicKey(form.key)) {
-            return CommonResponse(false, "invalid schonorr public key form")
+        if (!schnorrService.isValidPublicKey(form.key)) {
+            return CommonResponse(false, "invalid schnorr public key form")
         }
 
-        if (schonorrUserRepository.find(form.login) != null) {
+        if (schnorrUserRepository.find(form.login) != null) {
             return CommonResponse(false, "user with login ${form.login} already exists")
         }
 
@@ -187,8 +187,8 @@ class MainController
             return CommonResponse(false, "Signup request expired")
         }
 
-        val user = SchonorrUser(login = form.login, secret = form.key)
-        schonorrUserRepository.save(user)
+        val user = SchnorrUser(login = form.login, secret = form.key)
+        schnorrUserRepository.save(user)
         signupRequestRepository.delete(signupRequest)
         sessionService.bound(signupRequest.sessionId, user.login)
 
