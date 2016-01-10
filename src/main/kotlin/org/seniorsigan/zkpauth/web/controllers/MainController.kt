@@ -2,14 +2,14 @@ package org.seniorsigan.zkpauth.web.controllers
 
 import org.seniorsigan.zkpauth.core.models.SKeySecret
 import org.seniorsigan.zkpauth.core.models.SKeyUser
-import org.seniorsigan.zkpauth.core.repositories.LoginRequestRepository
-import org.seniorsigan.zkpauth.core.repositories.SKeyUserRepository
-import org.seniorsigan.zkpauth.core.repositories.SignupRequestRepository
-import org.seniorsigan.zkpauth.core.repositories.UserRepository
+import org.seniorsigan.zkpauth.core.models.SchonorrUser
+import org.seniorsigan.zkpauth.core.repositories.*
 import org.seniorsigan.zkpauth.core.services.DigestGenerator
+import org.seniorsigan.zkpauth.core.services.SchonorrService
 import org.seniorsigan.zkpauth.core.services.toBase64
 import org.seniorsigan.zkpauth.web.models.CommonResponse
 import org.seniorsigan.zkpauth.web.models.LoginForm
+import org.seniorsigan.zkpauth.web.models.SchonorrSignupForm
 import org.seniorsigan.zkpauth.web.models.SignupForm
 import org.seniorsigan.zkpauth.web.services.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,12 +29,14 @@ class MainController
 @Autowired constructor(
     val service: DigestGenerator,
     val sessionService: SessionService,
-    val userRepository: SKeyUserRepository,
+    val sKeyUserRepository: SKeyUserRepository,
+    val schonorrUserRepository: SchonorrUserRepository,
     val loginRequestRepository: LoginRequestRepository,
     val sKeyTokenGenerator: SKeyTokenGenerator,
     val schonorrTokenGenerator: SchonorrTokenGenerator,
     val qrCodeGenerator: QRCodeGenerator,
-    val signupRequestRepository: SignupRequestRepository
+    val signupRequestRepository: SignupRequestRepository,
+    val schonorrService: SchonorrService
 ) {
     @RequestMapping(value = "/", method = arrayOf(RequestMethod.GET))
     fun index(request: HttpServletRequest, model: Model): String {
@@ -67,12 +69,12 @@ class MainController
             loginRequestRepository.delete(loginRequest)
             return CommonResponse(false, "Login request expired")
         }
-        val user = userRepository.find(form.login)
+        val user = sKeyUserRepository.find(form.login)
         if (user != null) {
             val nextKey = service.generate(form.key)
             if (nextKey == user.token) {
                 user.token = form.key
-                userRepository.update(user)
+                sKeyUserRepository.update(user)
                 sessionService.bound(loginRequest.sessionId, user.login)
                 loginRequestRepository.delete(loginRequest)
                 println("User $user logged in")
@@ -122,7 +124,7 @@ class MainController
             return CommonResponse(false, "invalid signup form")
         }
 
-        if (userRepository.find(form.login) != null) {
+        if (sKeyUserRepository.find(form.login) != null) {
             return CommonResponse(false, "user with login ${form.login} already exists")
         }
 
@@ -134,25 +136,63 @@ class MainController
         }
 
         val user = SKeyUser(login = form.login, secret = SKeySecret(form.key))
-        userRepository.save(user)
+        sKeyUserRepository.save(user)
         signupRequestRepository.delete(signupRequest)
         sessionService.bound(signupRequest.sessionId, user.login)
 
-        println("Created user $user")
-        return CommonResponse(true, "", "success created user with login ${user.login}")
+        println("Created user $user with algorithm ${user.algorithm}")
+        return CommonResponse(true, "", "successfully created user with login ${user.login} and algorithm ${user.algorithm}")
     }
 
     @RequestMapping(value = "/login/schonorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun schonorrLogin(@RequestBody form: LoginForm): CommonResponse {
         println("Get schonorr login form $form")
-        return CommonResponse(false, "Not supported")
+        if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
+            return CommonResponse(false, "invalid login form")
+        }
+        val loginRequest = loginRequestRepository.findByToken(form.token) ?: return CommonResponse(false, "Can't find login request by token")
+        if (loginRequest.expiresAt <= Date()) {
+            loginRequestRepository.delete(loginRequest)
+            return CommonResponse(false, "Login request expired")
+        }
+        val user = schonorrUserRepository.find(form.login)
+
+        if (user != null) {
+            return CommonResponse(false, "Not supported")
+        }
+
+        return CommonResponse(false, "Can't find user")
     }
 
     @RequestMapping(value = "/signup/schonorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun schonorrSignup(@RequestBody form: SignupForm): CommonResponse {
+    fun schonorrSignup(@RequestBody form: SchonorrSignupForm): CommonResponse {
         println("Get schonorr signup form $form")
-        return CommonResponse(false, "Not supported")
+        if (!form.valid()) {
+            return CommonResponse(false, "invalid signup form")
+        }
+        if (!schonorrService.isValidPublicKey(form.key)) {
+            return CommonResponse(false, "invalid schonorr public key form")
+        }
+
+        if (schonorrUserRepository.find(form.login) != null) {
+            return CommonResponse(false, "user with login ${form.login} already exists")
+        }
+
+        val signupRequest = signupRequestRepository.findByToken(form.token) ?: return CommonResponse(false, "Can't find signup request by token")
+
+        if (signupRequest.expiresAt <= Date()) {
+            signupRequestRepository.delete(signupRequest)
+            return CommonResponse(false, "Signup request expired")
+        }
+
+        val user = SchonorrUser(login = form.login, secret = form.key)
+        schonorrUserRepository.save(user)
+        signupRequestRepository.delete(signupRequest)
+        sessionService.bound(signupRequest.sessionId, user.login)
+
+        println("Created user $user with algorithm ${user.algorithm}")
+        return CommonResponse(true, "", "successfully created user with login ${user.login} and algorithm ${user.algorithm}")
     }
 }

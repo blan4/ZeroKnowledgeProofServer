@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 
 @Repository
-open class SchonorrRepository
+open class SchonorrUserRepository
 @Autowired constructor(
     val userRepository: UserRepository,
     val objectMapper: ObjectMapper
