@@ -195,4 +195,10 @@ class MainController
             return CommonResponse(false, e.message ?: "Can't use token ${form.token}")
         }
     }
+
+    @RequestMapping(value = "/logout", method = arrayOf(RequestMethod.POST))
+    fun logout(request: HttpServletRequest): String {
+        request.session.invalidate()
+        return "redirect:/"
+    }
 }

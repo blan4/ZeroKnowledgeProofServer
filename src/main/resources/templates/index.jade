@@ -3,6 +3,8 @@ extends layout
 block append content
   if user
     p Hello #{user}
+    form(action="/logout", method="post")
+      button(type="submit") Logout
   else
     p Hello Anonymous
     .links
