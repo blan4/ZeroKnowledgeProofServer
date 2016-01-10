@@ -18,6 +18,7 @@ data class SchonorrSignupForm(
         return key.q != BigInteger.ZERO
             && key.p != BigInteger.ZERO
             && key.g != BigInteger.ZERO
+            && key.y != BigInteger.ZERO
             && login.isNotBlank()
             && token.isNotBlank()
     }

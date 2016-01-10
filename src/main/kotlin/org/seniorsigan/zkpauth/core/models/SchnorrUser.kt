@@ -21,5 +21,6 @@ data class SchnorrUser(
 data class SchnorrSecret(
     var p: BigInteger = BigInteger.ZERO,
     var q: BigInteger = BigInteger.ZERO,
-    var g: BigInteger = BigInteger.ZERO
+    var g: BigInteger = BigInteger.ZERO,
+    var y: BigInteger = BigInteger.ZERO
 )
