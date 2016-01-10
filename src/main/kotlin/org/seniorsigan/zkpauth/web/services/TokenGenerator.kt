@@ -13,21 +13,14 @@ import org.springframework.stereotype.Service
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
-@Service
-class TokenGenerator
-@Autowired constructor(
+abstract class TokenGenerator(
     val loginRequestRepository: LoginRequestRepository,
     val signupRequestRepository: SignupRequestRepository,
     val objectMapper: ObjectMapper
 ) {
-    @Value("\${domainName}")
-    lateinit var domainName: String
-
-    @Value("\${loginPath}")
-    lateinit var loginPath: String
-
-    @Value("\${signupPath}")
-    lateinit var signupPath: String
+    abstract var domainName: String
+    abstract val loginPath: String
+    abstract val signupPath: String
 
     fun generateLogin(): LoginToken {
         val uuid = UUID.randomUUID().toString()

@@ -9,11 +9,9 @@ import org.seniorsigan.zkpauth.core.repositories.UserRepository
 import org.seniorsigan.zkpauth.core.services.DigestGenerator
 import org.seniorsigan.zkpauth.core.services.toBase64
 import org.seniorsigan.zkpauth.web.models.CommonResponse
-import org.seniorsigan.zkpauth.web.models.SignInForm
+import org.seniorsigan.zkpauth.web.models.LoginForm
 import org.seniorsigan.zkpauth.web.models.SignupForm
-import org.seniorsigan.zkpauth.web.services.QRCodeGenerator
-import org.seniorsigan.zkpauth.web.services.SessionService
-import org.seniorsigan.zkpauth.web.services.TokenGenerator
+import org.seniorsigan.zkpauth.web.services.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -33,7 +31,8 @@ class MainController
     val sessionService: SessionService,
     val userRepository: SKeyUserRepository,
     val loginRequestRepository: LoginRequestRepository,
-    val tokenGenerator: TokenGenerator,
+    val sKeyTokenGenerator: SKeyTokenGenerator,
+    val schonorrTokenGenerator: SchonorrTokenGenerator,
     val qrCodeGenerator: QRCodeGenerator,
     val signupRequestRepository: SignupRequestRepository
 ) {
@@ -43,17 +42,22 @@ class MainController
         if (user != null) {
             model.addAttribute("user", user as String)
         } else {
-            val loginToken = tokenGenerator.createLoginJson(request)
-            val signupToken = tokenGenerator.createSignupJson(request)
-            model.addAttribute("loginToken", loginToken.toBase64())
-            model.addAttribute("signupToken", signupToken.toBase64())
+            val sKeyLoginToken = sKeyTokenGenerator.createLoginJson(request)
+            val sKeySignupToken = sKeyTokenGenerator.createSignupJson(request)
+            model.addAttribute("sKeyLoginToken", sKeyLoginToken.toBase64())
+            model.addAttribute("sKeySignupToken", sKeySignupToken.toBase64())
+
+            val schonorrLoginToken = sKeyTokenGenerator.createLoginJson(request)
+            val schonorrSignupToken = sKeyTokenGenerator.createSignupJson(request)
+            model.addAttribute("schonorrLoginToken", schonorrLoginToken.toBase64())
+            model.addAttribute("schonorrSignupToken", schonorrSignupToken.toBase64())
         }
         return "index"
     }
 
-    @RequestMapping(value = "/login", method = arrayOf(RequestMethod.POST))
+    @RequestMapping(value = "/login/skey", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun login(@RequestBody form: SignInForm): CommonResponse {
+    fun sKeyLogin(@RequestBody form: LoginForm): CommonResponse {
         println("Get login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid login form")
@@ -79,27 +83,40 @@ class MainController
         return CommonResponse(false, "Can't find user")
     }
 
-    @RequestMapping(value = "/login.png", method = arrayOf(RequestMethod.GET))
-    fun requestLogin(request: HttpServletRequest, response: ServletResponse) {
-        val token = tokenGenerator.createLogin(request)
+    @RequestMapping(value = "/login/skey.png", method = arrayOf(RequestMethod.GET))
+    fun requestSKeyLogin(request: HttpServletRequest, response: ServletResponse) {
+        val token = sKeyTokenGenerator.createLogin(request)
+        buildQRCodeResponse(token, response)
+    }
+
+    @RequestMapping(value = "/signup/skey.png", method = arrayOf(RequestMethod.GET))
+    fun requestSKeySignUp(request: HttpServletRequest, response: ServletResponse) {
+        val token = sKeyTokenGenerator.createSignup(request)
+        buildQRCodeResponse(token, response)
+    }
+
+    @RequestMapping(value = "/login/schonorr.png", method = arrayOf(RequestMethod.GET))
+    fun requestSchonorrLogin(request: HttpServletRequest, response: ServletResponse) {
+        val token = schonorrTokenGenerator.createLogin(request)
+        buildQRCodeResponse(token, response)
+    }
+
+    @RequestMapping(value = "/signup/schonorr.png", method = arrayOf(RequestMethod.GET))
+    fun requestSchonorrSignUp(request: HttpServletRequest, response: ServletResponse) {
+        val token = schonorrTokenGenerator.createSignup(request)
+        buildQRCodeResponse(token, response)
+    }
+
+    private fun buildQRCodeResponse(token: Any, response: ServletResponse) {
         val image = qrCodeGenerator.generateFromObject(token)
 
         response.contentType = "image/png"
         ImageIO.write(image, "png", response.outputStream)
     }
 
-    @RequestMapping(value = "/signup.png", method = arrayOf(RequestMethod.GET))
-    fun requestSignUp(request: HttpServletRequest, response: ServletResponse) {
-        val token = tokenGenerator.createSignup(request)
-        val image = qrCodeGenerator.generateFromObject(token)
-
-        response.contentType = "image/png"
-        ImageIO.write(image, "png", response.outputStream)
-    }
-
-    @RequestMapping(value = "/signup", method = arrayOf(RequestMethod.POST))
+    @RequestMapping(value = "/signup/skey", method = arrayOf(RequestMethod.POST))
     @ResponseBody
-    fun signUp(@RequestBody form: SignupForm): CommonResponse {
+    fun sKeySignUp(@RequestBody form: SignupForm): CommonResponse {
         println("Get signup form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid signup form")
@@ -123,5 +140,17 @@ class MainController
 
         println("Created user $user")
         return CommonResponse(true, "", "success created user with login ${user.login}")
+    }
+
+    @RequestMapping(value = "/login/schonorr", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun schonorrLogin(@RequestBody form: LoginForm): CommonResponse {
+        return CommonResponse(false, "Not supported")
+    }
+
+    @RequestMapping(value = "/signup/schonorr", method = arrayOf(RequestMethod.POST))
+    @ResponseBody
+    fun schonorrSignup(@RequestBody form: SignupForm): CommonResponse {
+        return CommonResponse(false, "Not supported")
     }
 }

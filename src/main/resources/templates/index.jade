@@ -6,5 +6,10 @@ block append content
   else
     p Hello Anonymous
     .links
-      a.intent(href="/signup.png", data-android-intent="intent://signup?token=#{signupToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/signup.png;end;") Singup
-      a.intent(href="/login.png", data-android-intent="intent://login?token=#{loginToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/login.png;end;") Login
+      h4 S/Key
+      a.intent(href="/signup/skey.png", data-android-intent="intent://signup?token=#{sKeySignupToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/signup/skey.png;end;") Sing up
+      a.intent(href="/login/skey.png", data-android-intent="intent://login?token=#{sKeyLoginToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/login/skey.png;end;") Login
+    .links
+      h4 Schonorr
+      a.intent(href="/signup/schonorr.png", data-android-intent="intent://signup?token=#{schonorrSignupToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/signup/schonorr.png;end;") Sing up
+      a.intent(href="/login/schonorr.png", data-android-intent="intent://login?token=#{schonorrLoginToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/login/schonorr.png;end;") Login

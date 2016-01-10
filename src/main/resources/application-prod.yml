@@ -1,6 +1,4 @@
 domainName: 'zkpauth.herokuapp.com'
-loginPath: '/login'
-signupPath: '/signup'
 
 spring:
   datasource:
