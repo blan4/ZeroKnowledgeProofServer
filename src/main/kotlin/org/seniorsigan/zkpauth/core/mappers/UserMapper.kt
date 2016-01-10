@@ -7,6 +7,7 @@ interface UserMapper {
     @Select("""
         SELECT id, login, algorithm, secret, created_at, updated_at
         FROM user_login
+        ORDER BY created_at
     """)
     @Results(
         Result(column = "id", property = "id"),

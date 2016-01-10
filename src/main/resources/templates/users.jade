@@ -1,0 +1,14 @@
+extends layout
+
+block append content
+  table
+    tr
+      th id
+      th login
+      th algorithm
+    each user in users
+      tr
+        td= user.id
+        td= user.login
+        td= user.algorithm
+

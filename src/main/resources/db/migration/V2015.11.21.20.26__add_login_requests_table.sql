@@ -1,4 +1,4 @@
-CREATE TABLE login_request (
+CREATE TABLE session_token (
     id BIGSERIAL NOT NULL,
     session_id VARCHAR(1024) NOT NULL,
     token VARCHAR(1024),

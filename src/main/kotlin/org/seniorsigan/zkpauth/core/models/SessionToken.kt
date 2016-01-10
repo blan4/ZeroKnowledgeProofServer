@@ -2,7 +2,7 @@ package org.seniorsigan.zkpauth.core.models
 
 import java.util.*
 
-data class SignupRequest(
+data class SessionToken(
     var id: Long = 0L,
     var sessionId: String = "",
     var token: String = "",

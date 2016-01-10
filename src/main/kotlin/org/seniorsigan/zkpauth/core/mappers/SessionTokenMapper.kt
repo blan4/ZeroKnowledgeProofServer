@@ -1,12 +1,12 @@
 package org.seniorsigan.zkpauth.core.mappers
 
 import org.apache.ibatis.annotations.*
-import org.seniorsigan.zkpauth.core.models.LoginRequest
+import org.seniorsigan.zkpauth.core.models.SessionToken
 
-interface LoginRequestMapper {
+interface SessionTokenMapper {
     @Select("""
         SELECT id, session_id, token, expires_at, created_at, updated_at
-        FROM login_request
+        FROM session_token
     """)
     @Results(
         Result(column = "id", property = "id"),
@@ -16,18 +16,18 @@ interface LoginRequestMapper {
         Result(column = "created_at", property = "createdAt"),
         Result(column = "updated_at", property = "updatedAt")
     )
-    open fun findAll(): List<LoginRequest>
+    open fun findAll(): List<SessionToken>
 
     @Insert("""
-        INSERT INTO login_request (session_id, token, expires_at)
+        INSERT INTO session_token (session_id, token, expires_at)
         VALUES (#{sessionId}, #{token}, #{expiresAt})
     """)
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
-    open fun save(loginRequest: LoginRequest)
+    open fun save(sessionToken: SessionToken)
 
     @Select("""
         SELECT id, session_id, token, expires_at, created_at, updated_at
-        FROM login_request
+        FROM session_token
         WHERE token = #{token}
     """)
     @Results(
@@ -38,16 +38,16 @@ interface LoginRequestMapper {
         Result(column = "created_at", property = "createdAt"),
         Result(column = "updated_at", property = "updatedAt")
     )
-    open fun findByToken(token: String): LoginRequest?
+    open fun findByToken(token: String): SessionToken?
 
     @Delete("""
-        DELETE FROM login_request WHERE id = #{id}
+        DELETE FROM session_token WHERE id = #{id}
     """)
-    open fun delete(loginRequest: LoginRequest)
+    open fun delete(sessionToken: SessionToken)
 
     @Select("""
         SELECT id, session_id, token, expires_at, created_at, updated_at
-        FROM login_request
+        FROM session_token
         WHERE session_id = #{sessionId}
     """)
     @Results(
@@ -58,12 +58,12 @@ interface LoginRequestMapper {
         Result(column = "created_at", property = "createdAt"),
         Result(column = "updated_at", property = "updatedAt")
     )
-    open fun findBySession(sessionId: String): LoginRequest?
+    open fun findBySession(sessionId: String): SessionToken?
 
     @Update("""
-        UPDATE login_request
+        UPDATE session_token
         SET token = #{token}, expires_at = #{expiresAt}
         WHERE id = #{id}
     """)
-    open fun update(loginRequest: LoginRequest)
+    open fun update(sessionToken: SessionToken)
 }
