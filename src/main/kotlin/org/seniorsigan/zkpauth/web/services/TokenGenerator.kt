@@ -21,17 +21,18 @@ abstract class TokenGenerator(
     abstract var domainName: String
     abstract val loginPath: String
     abstract val signupPath: String
+    abstract val algorithm: String
 
     fun generateLogin(): LoginToken {
         val uuid = UUID.randomUUID().toString()
         val expiresAt = Date(Date().time + 1000 * 60)
-        return LoginToken(domainName, uuid, loginPath, expiresAt)
+        return LoginToken(domainName, uuid, loginPath, expiresAt, algorithm)
     }
 
     fun generateSignup(): SignupToken {
         val uuid = UUID.randomUUID().toString()
         val expiresAt = Date(Date().time + 1000 * 180)
-        return SignupToken(domainName, uuid, signupPath, expiresAt)
+        return SignupToken(domainName, uuid, signupPath, expiresAt, algorithm)
     }
 
     fun createLogin(request: HttpServletRequest): LoginToken {

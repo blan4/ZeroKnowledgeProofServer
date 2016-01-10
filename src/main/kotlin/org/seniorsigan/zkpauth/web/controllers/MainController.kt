@@ -58,7 +58,7 @@ class MainController
     @RequestMapping(value = "/login/skey", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun sKeyLogin(@RequestBody form: LoginForm): CommonResponse {
-        println("Get login form $form")
+        println("Get skey login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid login form")
         }
@@ -117,7 +117,7 @@ class MainController
     @RequestMapping(value = "/signup/skey", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun sKeySignUp(@RequestBody form: SignupForm): CommonResponse {
-        println("Get signup form $form")
+        println("Get skey signup form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
             return CommonResponse(false, "invalid signup form")
         }
@@ -145,12 +145,14 @@ class MainController
     @RequestMapping(value = "/login/schonorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun schonorrLogin(@RequestBody form: LoginForm): CommonResponse {
+        println("Get schonorr login form $form")
         return CommonResponse(false, "Not supported")
     }
 
     @RequestMapping(value = "/signup/schonorr", method = arrayOf(RequestMethod.POST))
     @ResponseBody
     fun schonorrSignup(@RequestBody form: SignupForm): CommonResponse {
+        println("Get schonorr signup form $form")
         return CommonResponse(false, "Not supported")
     }
 }

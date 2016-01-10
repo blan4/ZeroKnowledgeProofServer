@@ -7,6 +7,7 @@ data class SignupToken(
     val token: String,
     val path: String,
     val expiresAt: Date,
-    val type: String = "SIGNUP",
-    val algorithm: String = "s/key"
-)
+    val algorithm: String
+) {
+    val type: String = "SIGNUP"
+}
