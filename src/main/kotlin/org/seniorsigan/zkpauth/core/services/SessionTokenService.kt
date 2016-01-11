@@ -14,7 +14,10 @@ open class SessionTokenService
 ){
     @Transactional(rollbackFor = arrayOf(Exception::class))
     open fun createToken(sessionId: String): SessionToken {
-        val uuid = UUID.randomUUID().toString()
+        var uuid: String
+        do {
+            uuid = UUID.randomUUID().toString()
+        } while (sessionTokenRepository.findByToken(uuid) != null)
         val token = SessionToken(sessionId = sessionId, token = uuid, expiresAt = Date(Date().time + 1000 * 60))
         sessionTokenRepository.saveOrUpdate(token)
         return token
