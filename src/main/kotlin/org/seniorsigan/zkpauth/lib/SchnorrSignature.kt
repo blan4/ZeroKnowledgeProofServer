@@ -68,8 +68,9 @@ class SchnorrSignature {
         return (session.r - pair.private.w * nonce) % pair.public.q
     }
 
-    fun verify(x: BigInteger, s: BigInteger, e: BigInteger, public: SchnorrPublicKey): Boolean {
-        val res = public.g.modPow(s, public.p) * public.y.modPow(e, public.p) % public.p
+    // x==g^s * y^nonce
+    fun verify(x: BigInteger, s: BigInteger, nonce: BigInteger, public: SchnorrPublicKey): Boolean {
+        val res = public.g.modPow(s, public.p) * public.y.modPow(nonce, public.p) % public.p
         return x == res
     }
 

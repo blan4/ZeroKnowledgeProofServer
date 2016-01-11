@@ -13,7 +13,6 @@ import org.seniorsigan.zkpauth.web.models.SignupForm
 import org.seniorsigan.zkpauth.web.services.QRCodeGenerator
 import org.seniorsigan.zkpauth.web.services.SKeyTokenGenerator
 import org.seniorsigan.zkpauth.web.services.SchnorrTokenGenerator
-import org.seniorsigan.zkpauth.web.services.SessionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -152,21 +151,22 @@ class MainController
     fun schnorrLogin(@RequestBody form: LoginForm): CommonResponse {
         println("Get schnorr login form $form")
         if (form.key.isBlank() || form.login.isBlank() || form.token.isBlank()) {
-            return CommonResponse(false, "invalid login form")
+            println("Invalid login form $form")
+            return CommonResponse(false, "Invalid login form $form")
+        }
+        val user = schnorrUserRepository.find(form.login)
+        if (user == null) {
+            println("Can't find user ${form.login}")
+            return CommonResponse(false, "Can't find user ${form.login}")
         }
 
         try {
-            val sessionId = sessionTokenService.use(form.token)
-            val user = schnorrUserRepository.find(form.login)
-
-            if (user != null) {
-                return CommonResponse(false, "Not supported")
-            }
+            val message = schnorrService.invoke(user, form.token, form.key)
+            return CommonResponse(success = true, message = message)
         } catch(e: ServiceException) {
+            println(e.message)
             return CommonResponse(false, e.message ?: "Can't use token ${form.token}")
         }
-
-        return CommonResponse(false, "Can't find user")
     }
 
     @RequestMapping(value = "/signup/schnorr", method = arrayOf(RequestMethod.POST))

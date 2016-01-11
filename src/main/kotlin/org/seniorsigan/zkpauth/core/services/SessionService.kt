@@ -1,4 +1,4 @@
-package org.seniorsigan.zkpauth.web.services
+package org.seniorsigan.zkpauth.core.services
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.RedisTemplate

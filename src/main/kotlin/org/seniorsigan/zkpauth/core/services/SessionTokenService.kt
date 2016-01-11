@@ -33,4 +33,23 @@ open class SessionTokenService
         }
         return st.sessionId
     }
+
+    @Transactional(noRollbackFor = arrayOf(ServiceException::class))
+    @Throws(ServiceException::class)
+    open fun find(token: String): SessionToken {
+        val st = sessionTokenRepository.findByToken(token) ?: throw ServiceException("Can't find session token $token")
+        if (st.expiresAt <= Date()) {
+            sessionTokenRepository.delete(st)
+            throw ServiceException("Session token $token expired")
+        }
+        return st
+    }
+
+    open fun update(st: SessionToken) {
+        sessionTokenRepository.update(st)
+    }
+
+    open fun delete(st: SessionToken) {
+        sessionTokenRepository.delete(st)
+    }
 }

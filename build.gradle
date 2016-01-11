@@ -46,7 +46,7 @@ sourceSets {
     }
     test {
         kotlin {
-            srcDir "test/main/kotlin"
+            srcDir "src/test/kotlin"
         }
     }
 }
