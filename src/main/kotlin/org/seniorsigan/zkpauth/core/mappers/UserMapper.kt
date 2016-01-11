@@ -36,14 +36,14 @@ interface UserMapper {
 
     @Insert("""
         INSERT INTO user_login (login, algorithm, secret)
-        VALUES (#{login}, #{algorithm}, #{secret})
+        VALUES (#{login}, #{algorithm}, #{secret}::jsonb)
     """)
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     open fun save(user: User)
 
     @Update("""
         UPDATE user_login
-        SET secret = #{secret}
+        SET secret = #{secret}::jsonb
         WHERE id = #{id}
     """)
     open fun update(user: User)

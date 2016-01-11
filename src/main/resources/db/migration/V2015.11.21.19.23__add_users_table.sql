@@ -2,7 +2,7 @@ CREATE TABLE user_login (
     id BIGSERIAL NOT NULL,
     login VARCHAR(255) NOT NULL ,
     algorithm VARCHAR(2048) NOT NULL,
-    secret VARCHAR NOT NULL,
+    secret JSONB NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now() NOT NULL,
     PRIMARY KEY(id)
