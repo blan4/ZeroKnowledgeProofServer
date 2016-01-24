@@ -7,6 +7,7 @@ block append content
       button(type="submit") Logout
   else
     p Hello Anonymous
+    a(href="https://github.com/blan4/ZeroKnowledgeProofClient/releases") Download android application
     .links
       h4 S/Key
       a.intent(href="/signup/skey.png", data-android-intent="intent://signup?token=#{sKeySignupToken}#Intent;scheme=org.seniorsigan.zkpauth;package=org.seniorsigan.zkpauthenticatorclient;S.browser_fallback_url=https://zkpauth.herokuapp.com/signup/skey.png;end;") Sing up
