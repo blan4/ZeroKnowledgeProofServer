@@ -1,0 +1,21 @@
+web:
+  image: java:8
+  volumes:
+    - .:/app
+  command: java -jar /app/app.jar --spring.profiles.active=prod --server.port=9000
+  ports:
+    - "9000:9000"
+  environment:
+    SPRING_DB_URL: jdbc:postgresql://db:5432/postgres
+    SPRING_DB_USERNAME: postgres
+    SPRING_DB_PASSWORD:
+    SPRING_REDIS_URL: redis
+    SPRING_REDIS_PORT: 6379
+    SPRING_REDIS_PASSWORD: 
+  links:
+    - db
+    - redis
+db:
+  image: postgres:9.5
+redis:
+  image: redis:3
