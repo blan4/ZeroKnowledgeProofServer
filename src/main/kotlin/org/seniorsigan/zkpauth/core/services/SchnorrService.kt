@@ -7,7 +7,6 @@ import org.seniorsigan.zkpauth.lib.SchnorrSignature
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.math.BigInteger
-import kotlin.math.minus
 
 @Service
 open class SchnorrService

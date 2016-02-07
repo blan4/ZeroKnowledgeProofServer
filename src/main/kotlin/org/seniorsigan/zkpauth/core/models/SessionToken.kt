@@ -7,6 +7,7 @@ data class SessionToken(
     var sessionId: String = "",
     var token: String = "",
     var meta: String? = null,
+    var requestInfo: RequestInfo = RequestInfo(),
     var expiresAt: Date = Date(),
     var createdAt: Date = Date(),
     var updatedAt: Date = Date()

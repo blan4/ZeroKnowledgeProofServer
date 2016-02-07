@@ -14,7 +14,7 @@ abstract class TokenGenerator(
     abstract val algorithm: String
 
     fun createLogin(st: SessionToken): LoginToken {
-        return LoginToken(domainName, st.token, loginPath, st.expiresAt, algorithm)
+        return LoginToken(domainName, st.token, loginPath, st.expiresAt, algorithm, st.requestInfo)
     }
 
     fun createLoginJson(st: SessionToken): String {
@@ -23,7 +23,7 @@ abstract class TokenGenerator(
     }
 
     fun createSignup(st: SessionToken): SignupToken {
-        return SignupToken(domainName, st.token, signupPath, st.expiresAt, algorithm)
+        return SignupToken(domainName, st.token, signupPath, st.expiresAt, algorithm, st.requestInfo)
     }
 
     fun createSignupJson(st: SessionToken): String {

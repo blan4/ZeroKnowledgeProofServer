@@ -1,5 +1,6 @@
 package org.seniorsigan.zkpauth.core.services
 
+import org.seniorsigan.zkpauth.core.models.RequestInfo
 import org.seniorsigan.zkpauth.core.models.SessionToken
 import org.seniorsigan.zkpauth.core.repositories.SessionTokenRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,12 +14,12 @@ open class SessionTokenService
     val sessionTokenRepository: SessionTokenRepository
 ){
     @Transactional(rollbackFor = arrayOf(Exception::class))
-    open fun createToken(sessionId: String): SessionToken {
+    open fun createToken(sessionId: String, requestInfo: RequestInfo): SessionToken {
         var uuid: String
         do {
             uuid = UUID.randomUUID().toString()
         } while (sessionTokenRepository.findByToken(uuid) != null)
-        val token = SessionToken(sessionId = sessionId, token = uuid, expiresAt = Date(Date().time + 1000 * 60))
+        val token = SessionToken(sessionId = sessionId, token = uuid, expiresAt = Date(Date().time + 1000 * 60), requestInfo = requestInfo)
         sessionTokenRepository.saveOrUpdate(token)
         return token
     }

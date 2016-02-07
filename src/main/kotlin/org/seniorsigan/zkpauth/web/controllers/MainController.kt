@@ -1,5 +1,6 @@
 package org.seniorsigan.zkpauth.web.controllers
 
+import org.seniorsigan.zkpauth.core.models.RequestInfo
 import org.seniorsigan.zkpauth.core.models.SKeySecret
 import org.seniorsigan.zkpauth.core.models.SKeyUser
 import org.seniorsigan.zkpauth.core.models.SchnorrUser
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import javax.imageio.ImageIO
-import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -45,7 +45,7 @@ class MainController
         if (user != null) {
             model.addAttribute("user", user as String)
         } else {
-            val token = sessionTokenService.createToken(request.session.id)
+            val token = sessionTokenService.createToken(request.session.id, requestInfo(request))
 
             val sKeyLoginToken = sKeyTokenGenerator.createLoginJson(token)
             val sKeySignupToken = sKeyTokenGenerator.createSignupJson(token)
@@ -101,28 +101,28 @@ class MainController
 
     @RequestMapping(value = "/login/skey.png", method = arrayOf(RequestMethod.GET))
     fun requestSKeyLogin(request: HttpServletRequest, response: HttpServletResponse) {
-        val st = sessionTokenService.createToken(request.session.id)
+        val st = sessionTokenService.createToken(request.session.id, requestInfo(request))
         val token = sKeyTokenGenerator.createLogin(st)
         buildQRCodeResponse(token, response)
     }
 
     @RequestMapping(value = "/signup/skey.png", method = arrayOf(RequestMethod.GET))
     fun requestSKeySignUp(request: HttpServletRequest, response: HttpServletResponse) {
-        val st = sessionTokenService.createToken(request.session.id)
+        val st = sessionTokenService.createToken(request.session.id, requestInfo(request))
         val token = sKeyTokenGenerator.createSignup(st)
         buildQRCodeResponse(token, response)
     }
 
     @RequestMapping(value = "/login/schnorr.png", method = arrayOf(RequestMethod.GET))
     fun requestSchonorrLogin(request: HttpServletRequest, response: HttpServletResponse) {
-        val st = sessionTokenService.createToken(request.session.id)
+        val st = sessionTokenService.createToken(request.session.id, requestInfo(request))
         val token = schnorrTokenGenerator.createLogin(st)
         buildQRCodeResponse(token, response)
     }
 
     @RequestMapping(value = "/signup/schnorr.png", method = arrayOf(RequestMethod.GET))
     fun requestSchonorrSignUp(request: HttpServletRequest, response: HttpServletResponse) {
-        val st = sessionTokenService.createToken(request.session.id)
+        val st = sessionTokenService.createToken(request.session.id, requestInfo(request))
         val token = schnorrTokenGenerator.createSignup(st)
         buildQRCodeResponse(token, response)
     }
@@ -212,5 +212,13 @@ class MainController
     fun logout(request: HttpServletRequest): String {
         request.session.invalidate()
         return "redirect:/"
+    }
+    
+    private fun requestInfo(request: HttpServletRequest): RequestInfo {
+        return RequestInfo(
+                ip = request.remoteAddr,
+                host = request.remoteHost,
+                port = request.remotePort,
+                userAgent = request.getHeader("User-Agent"))
     }
 }
