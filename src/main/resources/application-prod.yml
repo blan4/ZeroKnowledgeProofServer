@@ -1,18 +1,14 @@
 domainName: 'zkpauth.herokuapp.com'
+redisURL: ${REDIS_URL}
 
 spring:
   datasource:
-    url: ${SPRING_DB_URL}
-    username: ${SPRING_DB_USERNAME}
-    password: ${SPRING_DB_PASSWORD}
+    url: ${JDBC_DATABASE_URL}
+    username: ${JDBC_DATABASE_USERNAME}
+    password: ${JDBC_DATABASE_PASSWORD}
     test-on-borrow: true
     remove-abandoned: true
     validation-query: 'SELECT 1'
-
-  redis:
-    host: ${SPRING_REDIS_URL}
-    port: ${SPRING_REDIS_PORT}
-    password: ${SPRING_REDIS_PASSWORD}
 
   devtools:
     restart:
